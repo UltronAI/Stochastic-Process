@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.linalg as la
-
 import warnings
+
 warnings.filterwarnings("ignore")
 
 gauss = lambda x, mu, sigma: 1/(2*np.pi)/la.det(sigma)**0.5*np.exp(-1/2*(x-mu).T.dot(la.inv(sigma)).dot(x-mu))

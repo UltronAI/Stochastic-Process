@@ -1,4 +1,4 @@
-# 2017 Fall Probability and Stochastic Process
+# Probability and Stochastic Process (2017 Fall)
 
 Instructor: Zhijian Ou, Associate Professor
 

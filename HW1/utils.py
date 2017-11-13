@@ -1,5 +1,6 @@
 import numpy as np
 import numpy.linalg as la
+import random
 
 def A(_):
     return min(1, _)
@@ -152,15 +153,37 @@ def Merge(X, Mu, y, s, j1, j2, mu):
     out *= k * np.exp(C_) / (s * (k - 1))
     return out
 
+def Update1(X, Mu, y, mu):
+    d = Mu.shape[1]
+    Min = X.min(axis = 0)
+    Max = X.max(axis = 0)
+    W = Max - Min
+    t = 0.5
+    mu = np.zeros((1, d))
+    for i in range(d):
+        mu[0, i] = random.uniform(Min[i] - t * W[i], Max[i] + t * W[i])
+    return mu
+
+def Update2(X, Mu, y, mu):
+    d = Mu.shape[1]
+    I = np.identity(d)
+    mean = mu
+    sigma_ = np.cov(mu)
+    sigma = I * sigma_
+    mu = np.random.multivariate_normal(mean, sigma).reshape(1, d)
+    return mu
+
 def Update(X, Mu, y):
     N = X.shape[0]
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
+    threshold = 0.5 # np.random.rand()
     sigma = np.cov(Mu, rowvar = False)
     for j in range(Mu.shape[0]):
         mu = Mu[j, :]
-        mu_ = np.random.multivariate_normal(mu, sigma).reshape(1, d)
+        w = np.random.rand()
+        mu_ = Update1(X, Mu, y, mu) if w <= threshold else Update2(X, Mu, y, mu)
         Mu_ = Mu
         Mu_[j, :] = mu_
         P_ = P(X, Mu)
@@ -195,9 +218,9 @@ def Loss(X, Mu, y):
     
     predict = D_.dot(alpha) + n
 
-    return la.norm(y - predict)
-
-    
+    return (la.norm(y - predict)) / la.norm(y)
 
 def Pi(z):
-    pass
+    # using Gauss Distribution here
+    # mean =
+    pass 

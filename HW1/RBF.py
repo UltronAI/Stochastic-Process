@@ -1,15 +1,18 @@
 import scipy.io as sio
 import numpy as np
 from utils import *
-import warnings
+import warnings, time, os
+import matplotlib.pyplot as plt
 
 warnings.filterwarnings("ignore")
 
 data1_path = "data/data1.mat" # x: 1000 x 2 | y: 1000 x 2 | xtest: 200 x 2
 data2_path = "data/data2.mat" # x: 1000 x 3 | y: 1000 x 2 | xtets: 200 x 3
 
-print(">> Loading data from {} ...".format(data2_path))
-data = sio.loadmat(data2_path)
+order = 1
+
+print(">> Loading data from {} ...".format("data/data{}.mat".format(order)))
+data = sio.loadmat("data/data{}.mat".format(order))
 
 x = data["x"]
 y = data["y"]
@@ -25,11 +28,12 @@ c = y.shape[1]
 print("[N, d, c] = [{0}, {1}, {2}]".format(N, d, c))
 
 print(">> Initializing parameters ...")
-iter = 500
+iter = 1500
 s = 2
 k = 0
 k_max = 1000
 Mu = np.array([])
+loss = np.array([])
 
 b_ = lambda k, k_max: 0 if k == k_max else 1 if k == 0 else 0.2
 d_ = lambda k: 0 if k == 0 else 0.2
@@ -37,9 +41,20 @@ s_ = lambda k, k_max: 0 if k == 0 or k == k_max else 0.2
 m_ = lambda k: 0 if k == 0 or k ==1 else 0.2 
 
 print(">> Starting iteration ...")
+t0 = time.time()
 for i in range(iter):
-    if np.mod(i, 10) == 0:
-        print("iteration {0}: k = {1}, loss = {2}".format(i, k, Loss(x, Mu, y)))
+    loss_ = Loss(x, Mu, y)
+    loss = np.append(loss, loss_)
+    if np.mod(i, 50) == 0:
+        if i != 0:
+            plt.plot(np.arange(i + 1), loss)
+            plt.savefig("model/loss{}.png".format(order))
+        os.system("echo $i > log.txt")
+        t1 = time.time()
+        t = t1 - t0
+        np.save("model/Mu{}.npy".format(order), Mu)
+        print("[ Iteration {0} ] [ time = {1} ] [ k = {2} ] [ loss = {3} ]".format(i, t, k, loss_))
+        t0 = time.time()
     [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
     u = np.random.rand()
     if u <= bi:

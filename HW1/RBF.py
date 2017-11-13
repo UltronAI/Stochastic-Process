@@ -140,5 +140,5 @@ plt.plot(np.arange(i + 1), loss)
 plt.savefig("model/loss{}.png".format(order))
 print("[ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (i, t, k, loss_))
 
-ytest = Predict(xtest, Mu, alpha, y.shape[1])
+ytest = Predict(xtest, Mu, alpha, c)
 np.save("model/v{}.npy".format(order), ytest)

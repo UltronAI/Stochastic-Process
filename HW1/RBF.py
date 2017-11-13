@@ -55,7 +55,7 @@ for i in range(iter):
         t1 = time.time()
         t = t1 - t0
         np.save("model/Mu{}.npy".format(order), Mu)
-        print("[ Iteration {0} ] [ time = {1} ] [ k = {2} ] [ loss = {3} ]".format(i, t, k, loss_))
+        print("[ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (i, t, k, loss_))
         t0 = time.time()
     [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
     u = np.random.rand()
@@ -124,4 +124,4 @@ for i in range(iter):
             Mu = Update(x, Mu, y)
 
     # perform a MH step with the annealed acceptance ratio
-    pass
+    Mu = SA(x, Mu, y, i)

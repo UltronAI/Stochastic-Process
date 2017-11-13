@@ -221,9 +221,34 @@ def Loss(X, Mu, y):
     
     predict = D_.dot(alpha) + n
 
-    return (la.norm(y - predict)) / la.norm(y)
+    return 0.5 * np.sum((predict - y) ** 2)
 
-def Pi(z):
-    # using Gauss Distribution here
-    # mean =
-    pass 
+def T(i):
+    # base = 0.8
+    # coef = 20
+    # return coef * base ** i
+    return 2 / i if i > 0 else 666
+
+def Pi(T, loss):
+    return np.exp(-loss / T)
+
+def SA(X, Mu, y, iter):
+    N = X.shape[0]
+    c = y.shape[1]
+    k = Mu.shape[0]
+    threshold = 0.5 # np.random.rand()
+    sigma = np.cov(Mu, rowvar = False)
+    T_ = T(iter)
+    for j in range(k):
+        mu = Mu[j, :]
+        w = np.random.rand()
+        mu_ = Update1(X, Mu, y, mu) if w <= threshold else Update2(X, Mu, y, mu)
+        Mu_ = Mu
+        Mu_[j, :] = mu_
+        loss_ = Loss(X, Mu, y)
+        loss_1 = Loss(X, Mu_, y)
+        if Pi(T_, loss_) <= Pi(T_, loss_1):
+            Mu = Mu_
+        else:
+            pass
+    return Mu

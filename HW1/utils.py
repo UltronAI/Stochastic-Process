@@ -93,7 +93,7 @@ def Birth(X, Mu, y, mu):
     c = y.shape[1]
     k = Mu.shape[0]
     d = mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d) # using AIC criterion here
+    C_ = C(c + 1, "RJSA", k = k, d = d)
     S = 1
     out = 1
     if k == 0:
@@ -114,7 +114,7 @@ def Death(X, Mu, y, j):
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d) # using AIC criterion here
+    C_ = C(c + 1, "RJSA", k = k, d = d)
     S = 1
     out = 1
     Mu_ = np.concatenate((Mu[:j, :], Mu[j + 1:, :]))
@@ -130,7 +130,7 @@ def Split(X, Mu, y, s, j, mu1, mu2):
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d) # using AIC criterion here
+    C_ = C(c + 1, "RJSA", k = k, d = d)
     out = 1
     Mu_ = np.concatenate((Mu[:j, :], mu1, mu2, Mu[j + 1:, :]))
     P_ = P(X, Mu)
@@ -145,7 +145,7 @@ def Merge(X, Mu, y, s, j1, j2, mu):
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d) # using AIC criterion here
+    C_ = C(c + 1, "RJSA", k = k, d = d)
     out = 1
     [j1, j2] = [j2, j1] if j1 > j2 else [j1, j2]
     Mu_ = np.concatenate((Mu[:j1, :], Mu[j1 + 1 : j2, :], Mu[j2 + 1:, :], mu))

@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 warnings.filterwarnings("ignore")
 
-data1_path = "data/data1.mat" # x: 1000 x 2 | y: 1000 x 2 | xtest: 200 x 2
-data2_path = "data/data2.mat" # x: 1000 x 3 | y: 1000 x 2 | xtets: 200 x 3
+# data1_path = "data/data1.mat" : x: 1000 x 2 | y: 1000 x 2 | xtest: 200 x 2
+# data2_path = "data/data2.mat" : x: 1000 x 3 | y: 1000 x 2 | xtets: 200 x 3
 
 order = 1
 
@@ -49,8 +49,9 @@ for i in range(iter):
     tao = Tao(x, Mu, y)
     loss_ = Loss(x, Mu, y, alpha, tao)
     loss = np.append(loss, loss_)
-    if np.mod(i, 50) == 0:
+    if np.mod(i, 50) == 0: # save model per 50 iter
         if i != 0:
+            plt.figure()
             plt.plot(np.arange(i + 1), loss)
             plt.savefig("model/loss{}.png".format(order))
         os.system("echo $i > log.txt")
@@ -132,6 +133,7 @@ for i in range(iter):
     tao = Tao(x, Mu, y)
     Mu = SA(x, Mu, y, alpha, tao, i)
 
+# save model
 os.system("echo $i > log.txt")
 np.save("model/Mu{}.npy".format(order), Mu)
 np.save("model/Alpha{}.npy".format(order), alpha)
@@ -140,5 +142,6 @@ plt.plot(np.arange(i + 1), loss)
 plt.savefig("model/loss{}.png".format(order))
 print("[ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (i, t, k, loss_))
 
+# test
 ytest = Predict(xtest, Mu, alpha, c)
 np.save("model/v{}.npy".format(order), ytest)

@@ -201,7 +201,12 @@ def Update(X, Mu, y):
             pass
     return Mu
 
-def Loss(X, Mu, y):
+def Alpha(X, Mu, y):
+    D_ = D(X, Mu)
+    alpha = la.pinv(D_.T.dot(D_)).dot(D_.T).dot(y)
+    return alpha
+
+def Tao(X, Mu, y):
     N = X.shape[0]
     c = y.shape[1]
     tao = np.zeros((c, c))
@@ -209,10 +214,14 @@ def Loss(X, Mu, y):
     D_ = D(X, Mu)
     P_ = P(X, Mu)
 
-    alpha = la.pinv(D_.T.dot(D_)).dot(D_.T).dot(y)
-
     for t in range(c):
         tao[t, t] = 1 / N * y[:, t].T.dot(P_).dot(y[:, t])
+    
+    return tao
+
+def Predict(X, Mu, alpha, tao, c):
+    N = X.shape[0]
+    D_ = D(X, Mu)
 
     n = np.zeros((N, c))
     for t in range(N):
@@ -220,7 +229,11 @@ def Loss(X, Mu, y):
         n[t, :] = nt  
     
     predict = D_.dot(alpha) + n
+    
+    return predict
 
+def Loss(X, Mu, y, alpha, tao):
+    predict = Predict(X, Mu, alpha, tao, y.shape[1])
     return 0.5 * np.sum((predict - y) ** 2)
 
 def T(i):
@@ -232,7 +245,7 @@ def T(i):
 def Pi(T, loss):
     return np.exp(-loss / T)
 
-def SA(X, Mu, y, iter):
+def SA(X, Mu, y, alpha, tao, iter):
     N = X.shape[0]
     c = y.shape[1]
     k = Mu.shape[0]
@@ -245,8 +258,8 @@ def SA(X, Mu, y, iter):
         mu_ = Update1(X, Mu, y, mu) if w <= threshold else Update2(X, Mu, y, mu)
         Mu_ = Mu
         Mu_[j, :] = mu_
-        loss_ = Loss(X, Mu, y)
-        loss_1 = Loss(X, Mu_, y)
+        loss_ = Loss(X, Mu, y, alpha, tao)
+        loss_1 = Loss(X, Mu_, y, alpha, tao)
         if Pi(T_, loss_) <= Pi(T_, loss_1):
             Mu = Mu_
         else:

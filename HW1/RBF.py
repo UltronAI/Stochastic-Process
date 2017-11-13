@@ -30,7 +30,7 @@ c = y.shape[1]
 print("[N, d, c] = [{0}, {1}, {2}]".format(N, d, c))
 
 print(">> Initializing parameters ...")
-iter = 1500
+iter = 3000
 s = 2
 k = 0
 k_max = 1000
@@ -45,7 +45,9 @@ m_ = lambda k: 0 if k == 0 or k ==1 else 0.2
 print(">> Starting iteration ...")
 t0 = time.time()
 for i in range(iter):
-    loss_ = Loss(x, Mu, y)
+    alpha = Alpha(x, Mu, y)
+    tao = Tao(x, Mu, y)
+    loss_ = Loss(x, Mu, y, alpha, tao)
     loss = np.append(loss, loss_)
     if np.mod(i, 50) == 0:
         if i != 0:
@@ -55,6 +57,8 @@ for i in range(iter):
         t1 = time.time()
         t = t1 - t0
         np.save("model/Mu{}.npy".format(order), Mu)
+        np.save("model/Alpha{}.npy".format(order), alpha)
+        np.save("model/Tao{}.npy".format(order), tao)
         print("[ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (i, t, k, loss_))
         t0 = time.time()
     [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
@@ -124,4 +128,17 @@ for i in range(iter):
             Mu = Update(x, Mu, y)
 
     # perform a MH step with the annealed acceptance ratio
-    Mu = SA(x, Mu, y, i)
+    alpha = Alpha(x, Mu, y)
+    tao = Tao(x, Mu, y)
+    Mu = SA(x, Mu, y, alpha, tao, i)
+
+os.system("echo $i > log.txt")
+np.save("model/Mu{}.npy".format(order), Mu)
+np.save("model/Alpha{}.npy".format(order), alpha)
+np.save("model/Tao{}.npy".format(order), tao)
+plt.plot(np.arange(i + 1), loss)
+plt.savefig("model/loss{}.png".format(order))
+print("[ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (i, t, k, loss_))
+
+ytest = Predict(xtest, Mu, alpha, y.shape[1])
+np.save("model/v{}.npy".format(order), ytest)

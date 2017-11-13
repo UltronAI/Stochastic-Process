@@ -245,7 +245,7 @@ def T(i):
 def Pi(T, loss):
     return np.exp(-loss / T)
 
-def SA(X, Mu, y, alpha, tao, iter):
+def SA1(X, Mu, y, alpha, tao, iter):
     N = X.shape[0]
     c = y.shape[1]
     k = Mu.shape[0]
@@ -265,3 +265,16 @@ def SA(X, Mu, y, alpha, tao, iter):
         else:
             pass
     return Mu
+
+def SA2(X, y, iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old):
+    N = X.shape[0]
+    c = y.shape[1]
+    k = Mu.shape[0]
+    u = np.random.rand()
+    T_ = T(iter)
+    loss = Loss(X, Mu, y, alpha, tao)
+    loss_old = Loss(X, Mu_old, y, alpha_old, tao_old) 
+    if u <= A(Pi(T_, loss) / Pi(T_, loss_old)):
+        return Mu
+    else:
+        return Mu_old

@@ -151,11 +151,15 @@ for order in [2]: #[1, 2]:
             Mu = SA1(x, Mu, y, alpha, tao, i)
             """
             # SA method 2
+            """
             alpha = Alpha(x_train, Mu, y_train)
             tao = Tao(x_train, Mu, y_train)
             alpha_old = Alpha(x_train, Mu_old, y_train)
             tao_old = Tao(x_train, Mu_old, y_train)
             Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old)
+            """
+            # SA method 3
+            Mu = SA3(x_val, y_val, i, Mu, Mu_old)
 
         # save model
         alpha = Alpha(x_train, Mu, y_train)
@@ -173,9 +177,9 @@ for order in [2]: #[1, 2]:
 
         print("************ Training #{} is done ************".format(val + 1))
 
-    alpha = Alpha(x_train, Mu, y_train)
-    tao = Tao(x_train, Mu, y_train)
-    loss_ = Loss(x_val, Mu, y_val, alpha, tao)
+    alpha = Alpha(x, Mu, y)
+    tao = Tao(x, Mu, y)
+    loss_ = Loss(x, Mu, y, alpha, tao)
     print("Total loss: %.5f, k = %d" % (loss_, k))
 
     print("************ Do testing ************")

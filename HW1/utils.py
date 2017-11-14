@@ -234,7 +234,8 @@ def Predict(X, Mu, alpha, tao, c):
 
 def Loss(X, Mu, y, alpha, tao):
     predict = Predict(X, Mu, alpha, tao, y.shape[1])
-    return 0.5 * np.sum((predict - y) ** 2)
+    mse = ((predict - y) ** 2).mean()
+    return mse # 0.5 * np.sum((predict - y) ** 2)
 
 def T(i):
     # base = 0.8
@@ -295,7 +296,7 @@ def SA2(X, y, iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old):
     else:
         return Mu_old
 
-def SA3(X, y, iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old):
+def SA3(X, y, iter, Mu, Mu_old):
     u = np.random.rand()
     T_ = T(iter)
     Mk_ = Mk(T_, X, Mu, y)

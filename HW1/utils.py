@@ -247,7 +247,7 @@ def Mk(T, X, Mu, y):
     N = X.shape[0]
     c = y.shape[1]
     k = Mu.shape[0]
-    d = Mu.shape[1]
+    d = X.shape[1]
 
     out = 1
     P_ = P(X, Mu)
@@ -300,8 +300,8 @@ def SA3(X, y, iter, Mu, Mu_old):
     u = np.random.rand()
     T_ = T(iter)
     Mk_ = Mk(T_, X, Mu, y)
-    Mk_old = Mk(T_, X, MU_old, y)
-    if u <= A(Pi(T_, -Mk) / Pi(T_, -Mk_old)):
+    Mk_old = Mk(T_, X, Mu_old, y)
+    if u <= A(Pi(T_, -Mk_) / Pi(T_, -Mk_old)):
         return Mu
     else:
         return Mu_old

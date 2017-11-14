@@ -75,7 +75,7 @@ for order in [2]: #[1, 2]:
                 np.save("model/RJSA/Mu{}.npy".format(order), Mu)
                 np.save("model/RJSA/Alpha{}.npy".format(order), alpha)
                 np.save("model/RJSA/Tao{}.npy".format(order), tao)
-                print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.shape = %d x %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, Mu.shape[0], Mu.shape[1], loss_))
+                print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.row_num = %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, Mu.shape[0], loss_))
                 t0 = time.time()
             [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
             u = np.random.rand()
@@ -173,7 +173,7 @@ for order in [2]: #[1, 2]:
         plt.figure()
         plt.plot(np.arange((val + 1) * iter), loss)
         plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, val))
-        print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.shape = %d x %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, Mu.shape[0], Mu.shape[1], loss_))
+        print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.row_num = %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, Mu.shape[0], loss_))
 
         print("************ Training #{} is done ************".format(val + 1))
 

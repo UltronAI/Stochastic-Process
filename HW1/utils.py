@@ -253,9 +253,9 @@ def Mk(T, X, Mu, y):
     P_ = P(X, Mu)
 
     for i in range(c):
-        out *= (y[:, i].T.dot(P_).dot(y[:, i])) ** (-N / 2)
+        out += np.log(y[:, i].T.dot(P_).dot(y[:, i])) * (-N / 2)
 
-    out *= np.exp(-(k * (c + 1) + c * (d + 1)))
+    out += -(k * (c + 1) + c * (d + 1))
 
     return out
 

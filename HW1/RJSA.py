@@ -28,11 +28,15 @@ for order in [2]: #[1, 2]:
     y_split = np.split(y, 5)
 
     print("******** Initializing parameters ********")
-    k = 0
-    iter = 2000
+    if order == 1:
+        k = 0
+        Mu = np.array([])
+    else:
+        k = 300
+        Mu = np.random.rand(k, x.shape[1])
+    iter = 1000
     s = 1
-    k_max = 200
-    Mu = np.array([])
+    k_max = 500
     loss = np.array([])
     
     print("[k_max, s, iter] = [{0}, {1}, {2}]".format(k_max, s, iter))

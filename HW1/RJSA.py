@@ -32,7 +32,7 @@ for order in [2]: #[1, 2]:
         k = 0
         Mu = np.array([])
     else:
-        k = 300
+        k = 150
         Mu = np.random.rand(k, x.shape[1])
     iter = 1000
     s = 1
@@ -51,8 +51,8 @@ for order in [2]: #[1, 2]:
         print("************ Do training #{} ************".format(val + 1))
         x_val = x_split[val]
         y_val = y_split[val]
-        x_train = np.concatenate([f for j, f in enumerate(x_split) if j != val ])
-        y_train = np.concatenate([f for j, f in enumerate(y_split) if j != val ])
+        x_train = np.concatenate([f for j, f in enumerate(x_split) if j != val])
+        y_train = np.concatenate([f for j, f in enumerate(y_split) if j != val])
 
         [N, d] = x_train.shape
         c = y_train.shape[1]
@@ -87,7 +87,7 @@ for order in [2]: #[1, 2]:
                 # birth move
                 # print("birth move")
                 u_ = np.random.rand()
-                mu = Generate(x_train)
+                mu = Generate2(x_train)
                 if u_ <= A(Birth(x_train, Mu, y_train, mu)):
                     if k == 0:
                         mu = mu.reshape(d)

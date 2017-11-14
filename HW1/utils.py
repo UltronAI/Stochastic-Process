@@ -19,7 +19,7 @@ def FindClosest(Mu, j1):
             j2 = i
     return j2
 
-def Generate(X):
+def Generate1(X):
     d = X.shape[1]
     mean = X.mean(axis = 0)
     var = np.cov(X, rowvar=False)
@@ -29,6 +29,18 @@ def Generate(X):
         return np.random.multivariate_normal((mean + delta).reshape(d), var).reshape(1, d)
     else:
         return np.random.multivariate_normal((mean - delta).reshape(d), var).reshape(1, d)
+
+def Generate2(X):
+    x_min = X.min(axis = 1)
+    x_max = X.max(axis = 1)
+    delta = x_max - x_min
+    d = X.shape[1]
+    t = 0.5
+    mu = np.zeros((1, d))
+    for i in range(d):
+        mu[0, i] = random.uniform(x_min[i] - t * delta[i], x_max[i] + t * delta[i])
+    # mu = np.array([np.random.uniform(x_min[i] - delta, x_max[i] + delta, 1) for i in range(d)]).reshape(1, d)
+    return mu
 
 def C(c, method = "AIC", N = np.e**2, k = 0, d = 0):
     if method == "AIC":
@@ -93,7 +105,7 @@ def Birth(X, Mu, y, mu):
     c = y.shape[1]
     k = Mu.shape[0]
     d = mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d)
+    C_ = C(c, "RJSA", k = k, d = d)
     S = 1
     out = 1
     if k == 0:
@@ -114,7 +126,7 @@ def Death(X, Mu, y, j):
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d)
+    C_ = C(c, "RJSA", k = k, d = d)
     S = 1
     out = 1
     Mu_ = np.concatenate((Mu[:j, :], Mu[j + 1:, :]))
@@ -130,7 +142,7 @@ def Split(X, Mu, y, s, j, mu1, mu2):
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d)
+    C_ = C(c, "RJSA", k = k, d = d)
     out = 1
     Mu_ = np.concatenate((Mu[:j, :], mu1, mu2, Mu[j + 1:, :]))
     P_ = P(X, Mu)
@@ -145,7 +157,7 @@ def Merge(X, Mu, y, s, j1, j2, mu):
     c = y.shape[1]
     k = Mu.shape[0]
     d = Mu.shape[1]
-    C_ = C(c + 1, "RJSA", k = k, d = d)
+    C_ = C(c, "RJSA", k = k, d = d)
     out = 1
     [j1, j2] = [j2, j1] if j1 > j2 else [j1, j2]
     Mu_ = np.concatenate((Mu[:j1, :], Mu[j1 + 1 : j2, :], Mu[j2 + 1:, :], mu))
@@ -225,7 +237,7 @@ def Predict(X, Mu, alpha, tao, c):
 
     n = np.zeros((N, c))
     for t in range(N):
-        nt = np.random.multivariate_normal(np.zeros(c), tao).reshape(1, c)
+        nt = np.random.multivariate_normal(np.zeros(c), tao ** 2).reshape(1, c)
         n[t, :] = nt  
     
     predict = D_.dot(alpha) + n

@@ -75,7 +75,7 @@ for order in [1, 2]:
                 np.save("model/RJSA/Mu{}.npy".format(order), Mu)
                 np.save("model/RJSA/Alpha{}.npy".format(order), alpha)
                 np.save("model/RJSA/Tao{}.npy".format(order), tao)
-                print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val, i, t, k, loss_))
+                print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, loss_))
                 t0 = time.time()
             [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
             u = np.random.rand()
@@ -155,23 +155,23 @@ for order in [1, 2]:
             tao = Tao(x_train, Mu, y_train)
             alpha_old = Alpha(x_train, Mu_old, y_train)
             tao_old = Tao(x_train, Mu_old, y_train)
-            Mu = SA2(x_val, y_val, i, Mu, Mu_old, alpha, alpha_old, tao, tao_old)
+            Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old)
 
         # save model
         alpha = Alpha(x_train, Mu, y_train)
         tao = Tao(x_train, Mu, y_train)
-        loss_ = Loss(x_val, Mu, y_val, alpha, tao)
-        loss = np.append(loss, loss_)
+        # loss_ = Loss(x_val, Mu, y_val, alpha, tao)
+        # loss = np.append(loss, loss_)
         np.save("model/RJSA/Loss{}.npy".format(order), loss)
         np.save("model/RJSA/Mu{}.npy".format(order), Mu)
         np.save("model/RJSA/Alpha{}.npy".format(order), alpha)
         np.save("model/RJSA/Tao{}.npy".format(order), tao)
         plt.figure()
-        plt.plot(np.arange(i + 1 + val * iter), loss)
+        plt.plot(np.arange((val + 1) * iter), loss)
         plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, val))
-        print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val, i, t, k, loss_))
+        print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, loss_))
 
-        print("************ Training #{} is done ************".format(val))
+        print("************ Training #{} is done ************".format(val + 1))
 
     alpha = Alpha(x_train, Mu, y_train)
     tao = Tao(x_train, Mu, y_train)

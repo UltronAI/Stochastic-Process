@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore")
 # data1_path = "data/data1.mat" : x: 1000 x 2 | y: 1000 x 2 | xtest: 200 x 2
 # data2_path = "data/data2.mat" : x: 1000 x 3 | y: 1000 x 2 | xtets: 200 x 3
 
-for order in [1, 2]:
+for order in [2]: #[1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
@@ -75,7 +75,7 @@ for order in [1, 2]:
                 np.save("model/RJSA/Mu{}.npy".format(order), Mu)
                 np.save("model/RJSA/Alpha{}.npy".format(order), alpha)
                 np.save("model/RJSA/Tao{}.npy".format(order), tao)
-                print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, loss_))
+                print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.shape = %d x %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, Mu.shape[0], Mu.shape[1], loss_))
                 t0 = time.time()
             [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
             u = np.random.rand()
@@ -169,7 +169,7 @@ for order in [1, 2]:
         plt.figure()
         plt.plot(np.arange((val + 1) * iter), loss)
         plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, val))
-        print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, loss_))
+        print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.shape = %d x %d ] [ loss = %.5f ]" % (order, val + 1, i, t, k, Mu.shape[0], Mu.shape[1], loss_))
 
         print("************ Training #{} is done ************".format(val + 1))
 

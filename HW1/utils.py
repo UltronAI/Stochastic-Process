@@ -242,8 +242,24 @@ def T(i):
     # return coef * base ** i
     return 2 / i if i > 0 else 666
 
-def Pi(T, loss):
-    return np.exp(-loss / T)
+def Mk(T, X, Mu, y):
+    N = X.shape[0]
+    c = y.shape[1]
+    k = Mu.shape[0]
+    d = Mu.shape[1]
+
+    out = 1
+    P_ = P(X, Mu)
+
+    for i in range(c):
+        out *= (y[:, i].T.dot(P_).dot(y[:, i])) ** (-N / 2)
+
+    out *= np.exp(-(k * (c + 1) + c * (d + 1)))
+
+    return out
+
+def Pi(T, f):
+    return np.exp(-f / T)
 
 def SA1(X, Mu, y, alpha, tao, iter):
     N = X.shape[0]
@@ -275,6 +291,16 @@ def SA2(X, y, iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old):
     loss = Loss(X, Mu, y, alpha, tao)
     loss_old = Loss(X, Mu_old, y, alpha_old, tao_old) 
     if u <= A(Pi(T_, loss) / Pi(T_, loss_old)):
+        return Mu
+    else:
+        return Mu_old
+
+def SA3(X, y, iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old):
+    u = np.random.rand()
+    T_ = T(iter)
+    Mk_ = Mk(T_, X, Mu, y)
+    Mk_old = Mk(T_, X, MU_old, y)
+    if u <= A(Pi(T_, -Mk) / Pi(T_, -Mk_old)):
         return Mu
     else:
         return Mu_old

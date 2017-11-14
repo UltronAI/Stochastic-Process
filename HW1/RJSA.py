@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 
 for order in [1, 2]:
 
-    print(">> Loading data from {} ...".format("data/data{}.mat".format(order)))
+    print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
 
     x = data["x"]
@@ -27,12 +27,15 @@ for order in [1, 2]:
     x_split = np.split(x, 5)
     y_split = np.split(y, 5)
 
-    print(">> Initializing parameters ...")
+    print("******** Initializing parameters ********")
     k = 0
-    Mu = np.array([])
-    iter = 1000
+    iter = 2000
     s = 1
     k_max = 200
+    Mu = np.array([])
+    loss = np.array([])
+    
+    print("[k_max, s, iter] = [{0}, {1}, {2}]".format(k_max, s, iter))
 
     b_ = lambda k, k_max: 0 if k == k_max else 1 if k == 0 else 0.2
     d_ = lambda k: 0 if k == 0 else 0.2
@@ -41,7 +44,7 @@ for order in [1, 2]:
 
     for val in range(5):
 
-        print(">> Do training #{} ...".format(val + 1))
+        print("************ Do training #{} ************".format(val + 1))
         x_val = x_split[val]
         y_val = y_split[val]
         x_train = np.concatenate([f for j, f in enumerate(x_split) if j != val ])
@@ -51,8 +54,6 @@ for order in [1, 2]:
         c = y_train.shape[1]
 
         print("[N, d, c] = [{0}, {1}, {2}]".format(N, d, c))
-        
-        loss = np.array([]) 
 
         print(">> Starting iteration ...")
         t0 = time.time()
@@ -66,12 +67,11 @@ for order in [1, 2]:
             if np.mod(i, 50) == 0: # save model per 50 iter
                 if i != 0:
                     plt.figure()
-                    plt.plot(np.arange(i + 1), loss)
+                    plt.plot(np.arange(i + 1 + val * iter), loss)
                     plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, val))
-                os.system("echo $i > log.txt")
                 t1 = time.time()
                 t = t1 - t0
-                np.save("model/RJSA/Loss{0}_{1}.npy".format(order, val), loss)
+                np.save("model/RJSA/Loss{}.npy".format(order), loss)
                 np.save("model/RJSA/Mu{}.npy".format(order), Mu)
                 np.save("model/RJSA/Alpha{}.npy".format(order), alpha)
                 np.save("model/RJSA/Tao{}.npy".format(order), tao)
@@ -158,28 +158,29 @@ for order in [1, 2]:
             Mu = SA2(x_val, y_val, i, Mu, Mu_old, alpha, alpha_old, tao, tao_old)
 
         # save model
-        os.system("echo $i > log.txt")
         alpha = Alpha(x_train, Mu, y_train)
         tao = Tao(x_train, Mu, y_train)
-        np.save("model/RJSA/Loss{0}_{1}.npy".format(order, val), loss)
+        loss_ = Loss(x_val, Mu, y_val, alpha, tao)
+        loss = np.append(loss, loss_)
+        np.save("model/RJSA/Loss{}.npy".format(order), loss)
         np.save("model/RJSA/Mu{}.npy".format(order), Mu)
         np.save("model/RJSA/Alpha{}.npy".format(order), alpha)
         np.save("model/RJSA/Tao{}.npy".format(order), tao)
         plt.figure()
-        plt.plot(np.arange(i + 1), loss)
+        plt.plot(np.arange(i + 1 + val * iter), loss)
         plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, val))
         print("[ %d ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, val, i, t, k, loss_))
 
-        print(">> Train #{} is done ".format(val))
+        print("************ Training #{} is done ************".format(val))
 
     alpha = Alpha(x_train, Mu, y_train)
     tao = Tao(x_train, Mu, y_train)
     loss_ = Loss(x_val, Mu, y_val, alpha, tao)
     print("Total loss: %.5f, k = %d" % (loss_, k))
 
-    print(">> Training is over. Do testing ...")
+    print("************ Do testing ************")
 
     # test
     ytest = Predict(xtest, Mu, alpha, tao, c)
     np.save("model/RJSA/v{}.npy".format(order), ytest)
-    print("*** model-RJSA-v{} is saved ***".format(order))
+    print("******** model-RJSA-v{} is saved ********".format(order))

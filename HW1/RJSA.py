@@ -30,8 +30,8 @@ for order in [1, 2]:
     print("[N, d, c] = [{0}, {1}, {2}]".format(N, d, c))
 
     print(">> Initializing parameters ...")
-    iter = 2000
-    s = 2
+    iter = 3000
+    s = 1
     k = 0
     k_max = 200
     Mu = np.array([])
@@ -45,6 +45,7 @@ for order in [1, 2]:
     print(">> Starting iteration ...")
     t0 = time.time()
     for i in range(iter):
+        k = Mu.shape[0]
         Mu_old = Mu
         alpha = Alpha(x, Mu, y)
         tao = Tao(x, Mu, y)
@@ -158,6 +159,6 @@ for order in [1, 2]:
     print(">> Training is over. Do testing ...")
 
     # test
-    ytest = Predict(xtest, Mu, alpha, c)
+    ytest = Predict(xtest, Mu, alpha, tao, c)
     np.save("model/RJSA/v{}.npy".format(order), ytest)
     print("*** model-RJSA-v{} is saved ***".format(order))

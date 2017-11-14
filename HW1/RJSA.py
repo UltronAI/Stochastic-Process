@@ -15,6 +15,7 @@ for order in [2]: #[1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
+    phi = "Gauss" if order == 1 else "Cubic"
 
     x = data["x"]
     y = data["y"]
@@ -28,12 +29,16 @@ for order in [2]: #[1, 2]:
     y_split = np.split(y, 5)
 
     print("******** Initializing parameters ********")
+    """
     if order == 1:
         k = 0
         Mu = np.array([])
     else:
         k = 150
         Mu = np.random.rand(k, x.shape[1])
+    """
+    k = 0
+    Mu = np.array([])
     iter = 1000
     s = 1
     k_max = 500
@@ -64,9 +69,9 @@ for order in [2]: #[1, 2]:
         for i in range(iter):
             k = Mu.shape[0]
             Mu_old = Mu
-            alpha = Alpha(x_train, Mu, y_train)
-            tao = Tao(x_train, Mu, y_train)
-            loss_ = Loss(x_val, Mu, y_val, alpha, tao)
+            alpha = Alpha(x_train, Mu, y_train, phi)
+            tao = Tao(x_train, Mu, y_train, phi)
+            loss_ = Loss(x_val, Mu, y_val, alpha, tao, phi)
             loss = np.append(loss, loss_)
             if np.mod(i, 50) == 0: # save model per 50 iter
                 if i != 0:
@@ -88,7 +93,7 @@ for order in [2]: #[1, 2]:
                 # print("birth move")
                 u_ = np.random.rand()
                 mu = Generate2(x_train)
-                if u_ <= A(Birth(x_train, Mu, y_train, mu)):
+                if u_ <= A(Birth(x_train, Mu, y_train, mu, phi)):
                     if k == 0:
                         mu = mu.reshape(d)
                         Mu = np.concatenate((Mu, mu)).reshape(1, d)
@@ -102,7 +107,7 @@ for order in [2]: #[1, 2]:
                 # print("death move")
                 u_ = np.random.rand()
                 j = np.random.randint(0, k)
-                if u_ <= A(Death(x_train, Mu, y_train, j)):
+                if u_ <= A(Death(x_train, Mu, y_train, j, phi)):
                     k = k - 1
                     Mu = np.concatenate((Mu[:j, :], Mu[j + 1:, :]))
                 else:
@@ -116,7 +121,7 @@ for order in [2]: #[1, 2]:
                 u_1 = np.random.rand(1, d)
                 mu1 = mu - u_1 * s
                 mu2 = mu + u_1 * s
-                if u_ <= A(Split(x_train, Mu, y_train, s, j, mu1, mu2)):
+                if u_ <= A(Split(x_train, Mu, y_train, s, j, mu1, mu2, phi)):
                     k = k + 1
                     Mu = np.concatenate((Mu[:j, :], Mu[j + 1:, :], mu1, mu2))
                 else:
@@ -134,7 +139,7 @@ for order in [2]: #[1, 2]:
                     i -= 1
                     continue
                 mu = ((mu1 + mu2) * 0.5).reshape(1, d)
-                if u_ <= A(Merge(x_train, Mu, y_train, s, j1, j2, mu)):
+                if u_ <= A(Merge(x_train, Mu, y_train, s, j1, j2, mu, phi)):
                     k = k - 1
                     Mu = np.concatenate((Mu[:j1, :], Mu[j1 + 1: j2, :], Mu[j2 + 1:, :], mu))
                 else:
@@ -145,29 +150,29 @@ for order in [2]: #[1, 2]:
                 if k == 1:
                     pass
                 else:
-                    Mu = Update(x_train, Mu, y_train)
+                    Mu = Update(x_train, Mu, y_train, phi)
 
             # perform a MH step with the annealed acceptance ratio
             # SA method 1
             """
-            alpha = Alpha(x, Mu, y)
-            tao = Tao(x, Mu, y)
-            Mu = SA1(x, Mu, y, alpha, tao, i)
+            alpha = Alpha(x, Mu, y, phi)
+            tao = Tao(x, Mu, y, phi)
+            Mu = SA1(x, Mu, y, alpha, tao, i, phi)
             """
             # SA method 2
             """
-            alpha = Alpha(x_train, Mu, y_train)
-            tao = Tao(x_train, Mu, y_train)
-            alpha_old = Alpha(x_train, Mu_old, y_train)
-            tao_old = Tao(x_train, Mu_old, y_train)
-            Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old)
+            alpha = Alpha(x_train, Mu, y_train, phi)
+            tao = Tao(x_train, Mu, y_train, phi)
+            alpha_old = Alpha(x_train, Mu_old, y_train, phi)
+            tao_old = Tao(x_train, Mu_old, y_train, phi)
+            Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
             """
             # SA method 3
-            Mu = SA3(x_val, y_val, i, Mu, Mu_old)
+            Mu = SA3(x_val, y_val, i, Mu, Mu_old, phi)
 
         # save model
-        alpha = Alpha(x_train, Mu, y_train)
-        tao = Tao(x_train, Mu, y_train)
+        alpha = Alpha(x_train, Mu, y_train, phi)
+        tao = Tao(x_train, Mu, y_train, phi)
         # loss_ = Loss(x_val, Mu, y_val, alpha, tao)
         # loss = np.append(loss, loss_)
         np.save("model/RJSA/Loss{}.npy".format(order), loss)
@@ -181,14 +186,14 @@ for order in [2]: #[1, 2]:
 
         print("************ Training #{} is done ************".format(val + 1))
 
-    alpha = Alpha(x, Mu, y)
-    tao = Tao(x, Mu, y)
-    loss_ = Loss(x, Mu, y, alpha, tao)
+    alpha = Alpha(x, Mu, y, phi)
+    tao = Tao(x, Mu, y, phi)
+    loss_ = Loss(x, Mu, y, alpha, tao, phi)
     print("Total loss: %.5f, k = %d" % (loss_, k))
 
     print("************ Do testing ************")
 
     # test
-    ytest = Predict(xtest, Mu, alpha, tao, c)
+    ytest = Predict(xtest, Mu, alpha, tao, c, phi)
     np.save("model/RJSA/v{}.npy".format(order), ytest)
     print("******** model-RJSA-v{} is saved ********".format(order))

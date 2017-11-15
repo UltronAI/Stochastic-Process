@@ -21,9 +21,9 @@ for order in [2]: #[1, 2]:
     y = data["y"]
     xtest = data["xtest"]
 
-    index_max = y.argmax(axis = 0)[1]
-    x = np.delete(x, index_max, 0)
-    y = np.delete(y, index_max, 0)
+    index = y[:, 1].argsort()[-5:][::-1]
+    x = np.delete(x, index, 0)
+    y = np.delete(y, index, 0)
 
     print("x:", x.shape)
     print("y:", y.shape)

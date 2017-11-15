@@ -15,7 +15,7 @@ for order in [2]: #[1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
-    phi = "Gauss" if order == 1 else "Cubic"
+    phi = "Gauss" if order == 1 else "Cubic" # "ThinPlateSpline"
 
     x = data["x"]
     y = data["y"]
@@ -160,15 +160,15 @@ for order in [2]: #[1, 2]:
             Mu = SA1(x, Mu, y, alpha, tao, i, phi)
             """
             # SA method 2
-            """
             alpha = Alpha(x_train, Mu, y_train, phi)
             tao = Tao(x_train, Mu, y_train, phi)
             alpha_old = Alpha(x_train, Mu_old, y_train, phi)
             tao_old = Tao(x_train, Mu_old, y_train, phi)
             Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
-            """
             # SA method 3
+            """
             Mu = SA3(x_val, y_val, i, Mu, Mu_old, phi)
+            """
 
         # save model
         alpha = Alpha(x_train, Mu, y_train, phi)

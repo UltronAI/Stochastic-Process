@@ -15,7 +15,7 @@ for order in [2]: #[1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
-    phi = "Gauss" if order == 1 else "CubicGauss" # "Cubic" # "ThinPlateSpline"
+    phi = "Gauss" if order == 1 else "Cubic"
 
     x = data["x"]
     y = data["y"]

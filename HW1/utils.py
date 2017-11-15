@@ -80,6 +80,7 @@ def Phi(X, Mu, phi = "Gauss"):
         if phi == "Liearn":
             out[i, :] = Linear(s)
         elif phi == "Cubic":
+            s = np.sum(X[i, :] - Mu)
             out[i, :] = Cubic(s)
         elif phi == "ThinPlateSpline":
             out[i, :] = ThinPlateSpline(s)

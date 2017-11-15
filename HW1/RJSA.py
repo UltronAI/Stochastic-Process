@@ -15,15 +15,18 @@ for order in [2]: #[1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
-    phi = "Gauss" if order == 1 else "Cubic" # "ThinPlateSpline"
+    phi = "Gauss" if order == 1 else "CubicGauss" # "Cubic" # "ThinPlateSpline"
 
     x = data["x"]
     y = data["y"]
     xtest = data["xtest"]
 
-    index = y[:, 1].argsort()[-5:][::-1]
-    x = np.delete(x, index, 0)
-    y = np.delete(y, index, 0)
+    index_max = y[:, 1].argsort()[-3:][::-1]
+    x = np.delete(x, index_max, 0)
+    y = np.delete(y, index_max, 0)
+    index_min = y[:, 1].argsort()[:2][::-1]
+    x = np.delete(x, index_min, 0)
+    y = np.delete(y, index_min, 0)
 
     print("x:", x.shape)
     print("y:", y.shape)
@@ -33,19 +36,19 @@ for order in [2]: #[1, 2]:
     y_split = np.split(y, 5)
 
     print("******** Initializing parameters ********")
-    """
     if order == 1:
         k = 0
         Mu = np.array([])
     else:
-        k = 150
-        Mu = np.random.rand(k, x.shape[1])
+        k = 70
+        Mu = np.random.randn(k, x.shape[1])
     """
     k = 0
     Mu = np.array([])
-    iter = 1500
+    """
+    iter = 2000
     s = 1
-    k_max = 300
+    k_max = 200
     loss = np.array([])
     
     print("[k_max, s, iter] = [{0}, {1}, {2}]".format(k_max, s, iter))
@@ -172,8 +175,7 @@ for order in [2]: #[1, 2]:
             Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
             """
             # SA method 3
-            
-            Mu = SA3(x_val, y_val, i, Mu, Mu_old, phi)
+            Mu = SA3(x_train, y_train, i, Mu, Mu_old, phi)
             
 
         # save model

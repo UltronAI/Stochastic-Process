@@ -67,6 +67,10 @@ def Gauss(s):
     lamb = 0.5
     return np.exp(-lamb * s**2)
 
+def CubicGauss(s):
+    lamb = 0.5
+    return np.exp(-lamb * s**3)
+
 def Phi(X, Mu, phi = "Gauss"):
     N = X.shape[0]
     k = Mu.shape[0]
@@ -81,6 +85,8 @@ def Phi(X, Mu, phi = "Gauss"):
             out[i, :] = ThinPlateSpline(s)
         elif phi == "Multiquadric":
             out[i, :] = Multiquadric(s)
+        elif phi == "CubicGauss":
+            out[i, :] = CubicGauss(s)
         else:
             out[i, :] = Gauss(s)
     return out

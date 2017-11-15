@@ -21,6 +21,10 @@ for order in [2]: #[1, 2]:
     y = data["y"]
     xtest = data["xtest"]
 
+    index_max = y.argmax(axis = 0)[1]
+    x = np.delete(x, index_max, 0)
+    y = np.delete(y, index_max, 0)
+
     print("x:", x.shape)
     print("y:", y.shape)
     print("xtest:", xtest.shape)
@@ -160,15 +164,17 @@ for order in [2]: #[1, 2]:
             Mu = SA1(x, Mu, y, alpha, tao, i, phi)
             """
             # SA method 2
+            """
             alpha = Alpha(x_train, Mu, y_train, phi)
             tao = Tao(x_train, Mu, y_train, phi)
             alpha_old = Alpha(x_train, Mu_old, y_train, phi)
             tao_old = Tao(x_train, Mu_old, y_train, phi)
             Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
+            """
             # SA method 3
-            """
+            
             Mu = SA3(x_val, y_val, i, Mu, Mu_old, phi)
-            """
+            
 
         # save model
         alpha = Alpha(x_train, Mu, y_train, phi)

@@ -42,6 +42,12 @@ def Generate2(X):
     # mu = np.array([np.random.uniform(x_min[i] - delta, x_max[i] + delta, 1) for i in range(d)]).reshape(1, d)
     return mu
 
+def InitMu(k, X):
+    Mu = np.zeros((k, X.shape[1]))
+    for i in range(k):
+        Mu[i, :] = Generate2(X)
+    return Mu
+
 def C(c, method = "AIC", N = np.e**2, k = 0, d = 0):
     if method == "AIC":
         return c + 1

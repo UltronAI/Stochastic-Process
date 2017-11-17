@@ -20,4 +20,9 @@ k = 1 # number of steps
 k_max = 100
 
 h = np.array([random.uniform(0, 66666) for i in range(k)])
-s = np.array([x[0]] + sorted([random.randint(min(x) + 1, max(x)) for i in range(k - 1)]) + [x[-1]])
+s = np.array([x[0]] + sorted([random.uniform(min(x), max(x)) for i in range(k - 1)]) + [x[-1]])
+
+if k != h.shape[0]:
+    raise ValueError("H_error : k = {0}, while h_len = {1}".format(k, h.shape[0]))
+elif k != s.shape[0] - 1:
+    raise ValueError("S_error : k = {0}, while s_len = {1}".format(k, s.shape[0]))

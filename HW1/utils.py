@@ -86,7 +86,6 @@ def Phi(X, Mu, phi = "Gauss"):
         if phi == "Liearn":
             out[i, :] = Linear(s)
         elif phi == "Cubic":
-            s = np.sum(X[i, :] - Mu)
             out[i, :] = Cubic(s)
         elif phi == "ThinPlateSpline":
             out[i, :] = ThinPlateSpline(s)
@@ -113,13 +112,24 @@ def P(X, Mu, phi = "Gauss"):
     D_ = D(X, Mu, phi)
     return I - D_.dot(la.pinv(D_.T.dot(D_))).dot(D_.T)
 
+def S(X):
+    d = X.shape[1]
+    x_min = X.min(axis = 1)
+    x_max = X.max(axis = 1)
+    delta = x_max - x_min
+    s = 1
+    t = 0.5
+    for i in range(d):
+        s *= (1 + 2 * t) * delta[i]
+    return s
+
 def Birth(X, Mu, y, mu, phi = "Gauss"):
     N = X.shape[0]
     c = y.shape[1]
     k = Mu.shape[0]
     d = mu.shape[1]
     C_ = C(c, "RJSA", k = k, d = d)
-    S = 1
+    S_ = S(X)
     out = 1
     if k == 0:
         Mu = Mu.reshape(0)
@@ -131,7 +141,7 @@ def Birth(X, Mu, y, mu, phi = "Gauss"):
     P_1 = P(X, Mu_, phi)
     for i in range(c):
         out *= (y[:, i].T.dot(P_).dot(y[:, i]) / y[:, i].T.dot(P_1).dot(y[:, i])) ** (N/2)
-    out *= S * np.exp(-C_) / (k + 1)
+    out *= S_ * np.exp(-C_) / (k + 1)
     return out
 
 def Death(X, Mu, y, j, phi = "Gauss"):
@@ -140,14 +150,14 @@ def Death(X, Mu, y, j, phi = "Gauss"):
     k = Mu.shape[0]
     d = Mu.shape[1]
     C_ = C(c, "RJSA", k = k, d = d)
-    S = 1
+    S_ = S(X)
     out = 1
     Mu_ = np.concatenate((Mu[:j, :], Mu[j + 1:, :]))
     P_ = P(X, Mu, phi)
     P_1 = P(X, Mu_, phi)
     for i in range(c):
         out *= (y[:, i].T.dot(P_).dot(y[:, i]) / y[:, i].T.dot(P_1).dot(y[:, i])) ** (N/2)
-    out *= k * np.exp(C_) / S
+    out *= k * np.exp(C_) / S_
     return out
 
 def Split(X, Mu, y, s, j, mu1, mu2, phi = "Gauss"):

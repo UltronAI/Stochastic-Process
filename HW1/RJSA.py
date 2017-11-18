@@ -15,7 +15,7 @@ for order in [2]: # [1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
-    phi = "Gauss" if order == 1 else "Cubic"
+    phi = "Gauss" if order == 1 else "Gauss"
     use_val = False
 
     x = data["x"]
@@ -42,7 +42,7 @@ for order in [2]: # [1, 2]:
         k = 0
         Mu = np.array([])
     else:
-        k = 200
+        k = 300
         # Mu = np.random.randn(k, x.shape[1])
         Mu = InitMu(k, x)
     """
@@ -70,10 +70,10 @@ for order in [2]: # [1, 2]:
             x_train = np.concatenate([f for j, f in enumerate(x_split) if j != val])
             y_train = np.concatenate([f for j, f in enumerate(y_split) if j != val])
         else:
-            x_train = x
-            x_val = x
-            y_train = y
-            y_val = y
+            x_val = x_split[4]
+            y_val = y_split[4]
+            x_train = np.concatenate([f for j, f in enumerate(x_split) if j != 4])
+            y_train = np.concatenate([f for j, f in enumerate(y_split) if j != 4])
 
         [N, d] = x_train.shape
         c = y_train.shape[1]
@@ -88,6 +88,7 @@ for order in [2]: # [1, 2]:
             alpha = Alpha(x_train, Mu, y_train, phi)
             tao = Tao(x_train, Mu, y_train, phi)
             loss_ = Loss(x_val, Mu, y_val, alpha, tao, phi)
+            loss_train = Loss(x_train, Mu, y_train, alpha, tao, phi)
             loss = np.append(loss, loss_)
             if np.mod(i, 100) == 0: # save model per 50 iter
                 if i != 0:
@@ -104,9 +105,9 @@ for order in [2]: # [1, 2]:
                 np.save("model/RJSA/Alpha{0}_{1}.npy".format(order, phi), alpha)
                 np.save("model/RJSA/Tao{0}_{1}.npy".format(order, phi), tao)
                 if use_val == True:
-                    print("[ %d ] [ kernel = %s ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.row_num = %d ] [ loss = %.5f ]" % (order, phi, val + 1, i, t, k, Mu.shape[0], loss_))
+                    print("[ %d ] [ %s ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, val + 1, i, t, k, loss_, loss_train))
                 else:
-                    print("[ %d ] [ kernel = %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.row_num = %d ] [ loss = %.5f ]" % (order, phi, i, t, k, Mu.shape[0], loss_))
+                    print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, i, t, k, loss_, loss_train))
                 t0 = time.time()
             [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
             u = np.random.rand()
@@ -207,12 +208,12 @@ for order in [2]: # [1, 2]:
         plt.plot(np.arange((val + 1) * iter), loss)
         if use_val == True:
             plt.savefig("model/RJSA/loss{0}_{1}_{2}.png".format(order, val, phi))
-            print("[ %d ] [ kernel = %s ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.row_num = %d ] [ loss = %.5f ]" % (order, phi, val + 1, i, t, k, Mu.shape[0], loss_))
+            print("[ %d ] [ %s ] [ val = %d ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, phi, val + 1, i, t, k, loss_))
 
             print("************ Training #{} is done ************".format(val + 1))
         else:
             plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, phi))
-            print("[ %d ] [ kernel = %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ Mu.row_num = %d ] [ loss = %.5f ]" % (order, phi, i, t, k, Mu.shape[0], loss_))
+            print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ loss = %.5f ]" % (order, phi, i, t, k, loss_))
 
     alpha = Alpha(x, Mu, y, phi)
     tao = Tao(x, Mu, y, phi)

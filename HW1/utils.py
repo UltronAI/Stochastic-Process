@@ -70,7 +70,7 @@ def Multiquadric(s):
     return (s**2 + lamb) ** 0.5
 
 def Gauss(s):
-    lamb = 0.5
+    lamb = 1 / 2.5 ** 2
     return np.exp(-lamb * s**2)
 
 def CubicGauss(s):
@@ -217,7 +217,6 @@ def Update(X, Mu, y, phi = "Gauss"):
     k = Mu.shape[0]
     d = Mu.shape[1]
     threshold = 0.5 # np.random.rand()
-    sigma = np.cov(Mu, rowvar = False)
     for j in range(Mu.shape[0]):
         mu = Mu[j, :]
         w = np.random.rand()

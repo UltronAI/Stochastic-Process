@@ -1,7 +1,7 @@
 import scipy.io as sio
 import numpy as np
 import random
-from utils1 import *
+from utils_RJMCMC import *
 import warnings, time, os
 import matplotlib as mpl
 mpl.use("Agg")

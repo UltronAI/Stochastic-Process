@@ -141,15 +141,20 @@ def Reduce(X, Theta, y, threshold, iter):
     phi = Phi(X, Theta)
     N = phi.shape[0]
     r = np.sum(phi * R.T, axis = 0) / N
+    print(r.max())
+    print(r.min())
     index = np.where(r >= threshold)
+    print(index)
+    print(index[0].shape)
     Theta_ = Theta[index]
+    print(Theta_.shape)
     alpha_ = Alpha(X, Theta_, y)
     tao_ = Tao(X, Theta_, y)
     T_ = T(iter)
     loss = Loss(X, Theta, y, alpha, tao)
     loss_ = Loss(X, Theta_, y, alpha_, tao_) 
     u = np.random.rand()
-    if u <= A(Pi(T_, loss_) / Pi(T_, loss)):
-        return Theta_
+    if loss_ < loss:
+        Theta = Theta_
     else:
-        return Theta
+        pass

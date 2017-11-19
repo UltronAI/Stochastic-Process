@@ -62,6 +62,9 @@ def Linear(s):
 def Cubic(s):
     return s**3
 
+def Pow4(s):
+    return s**4
+
 def ThinPlateSpline(s):
     return s**2 * np.log(s)
 
@@ -93,6 +96,8 @@ def Phi(X, Mu, phi = "Gauss"):
             out[i, :] = Multiquadric(s)
         elif phi == "CubicGauss":
             out[i, :] = CubicGauss(s)
+        elif phi == "Pow4":
+            out[i, :] = Pow4(s)
         else:
             out[i, :] = Gauss(s)
     return out

@@ -48,42 +48,42 @@ def Phi(X, Mu, phi = "Gauss"):
             out[i, :] = Gauss(s)
     return out
 
-def D(X, Mu, phi = "Gauss"):
+def D(X, W = np.array([])):
     D1 = np.ones((X.shape[0], 1))
     D2 = X
-    if Mu.shape[0] > 0:
-        D3 = Phi(X, Mu, phi)
+    if W.shape[0] > 0:
+        D3 = W
         return np.concatenate((D1, D2, D3), axis = 1)
     else:
         return np.concatenate((D1, D2), axis = 1)
 
-def P(X, Mu, phi = "Gauss"):
+def P(X, W = np.array([])):
     N = X.shape[0]
     I = np.identity(N)
-    D_ = D(X, Mu, phi)
+    D_ = D(X, W)
     return I - D_.dot(la.pinv(D_.T.dot(D_))).dot(D_.T)
 
-def Alpha(X, Mu, y, phi = "Gauss"):
-    D_ = D(X, Mu, phi)
+def Alpha(X, W, y, phi = "Gauss"):
+    D_ = D(X, W)
     alpha = la.pinv(D_.T.dot(D_)).dot(D_.T).dot(y)
     return alpha
 
-def Tao(X, Mu, y, phi = "Gauss"):
+def Tao(X, W, y, phi = "Gauss"):
     N = X.shape[0]
     c = y.shape[1]
     tao = np.zeros((c, c))
 
-    D_ = D(X, Mu, phi)
-    P_ = P(X, Mu, phi)
+    D_ = D(X, W)
+    P_ = P(X, W)
 
     for t in range(c):
         tao[t, t] = 1 / N * y[:, t].T.dot(P_).dot(y[:, t])
     
     return tao
 
-def Predict(X, Mu, alpha, tao, c, phi = "Gauss"):
+def Predict(X, W, alpha, tao, c, phi = "Gauss"):
     N = X.shape[0]
-    D_ = D(X, Mu, phi)
+    D_ = D(X, W)
 
     n = np.zeros((N, c))
     for t in range(N):
@@ -94,8 +94,8 @@ def Predict(X, Mu, alpha, tao, c, phi = "Gauss"):
     
     return predict
 
-def Loss(X, Mu, y, alpha, tao, phi = "Gauss"):
-    predict = Predict(X, Mu, alpha, tao, y.shape[1], phi)
+def Loss(X, W, y, alpha, tao, phi = "Gauss"):
+    predict = Predict(X, W, alpha, tao, y.shape[1], phi)
     mse = ((predict - y) ** 2).mean()
     return mse # 0.5 * np.sum((predict - y) ** 2)       
             
@@ -103,19 +103,18 @@ def ArgErrMax(W, d, Arg):
     c = d.shape[1]
     M = W.shape[1]
     g = np.zeros((c, M))
-    e = np.zeros((c, M))
-    for i in range(c):
-        for j in range(M):
+    e = np.zeros(M)
+    for j in range(M):
+        for i in range(c):
             g[i, j] = W[:, j].T.dot(d[:, i]) / W[:, j].T.dot(W[:, j])
-            e[i, j] = g[i, j] ** 2 * W[:, j].T.dot(W[:, j]) / d[:, i].T.dot(d[:, i])
-    esum = e.sum(axis = 0)
-    for i in range(len(esum)):
-        arg = esum.argmax()
+        e[j] = (g[:, j] ** 2).sum() * W[:, j].T.dot(W[:, j]) / np.trace(d.T.dot(d))
+    for i in range(len(e)):
+        arg = e.argmax()
         if arg not in Arg:
             break
         else:
-            esum = np.delete(esum, arg)
-    return arg, esum[arg]
+            e[arg] = 0
+    return arg, e[arg]
 
 def GetW(W, W_, Q, Arg):
     k = W.shape[1]
@@ -129,9 +128,21 @@ def GetW(W, W_, Q, Arg):
         W_[:, i] = Q[:, i] - (alpha * W).sum(axis = 1)
     return W_
 
-def GetA(W, Q):
+def GetA(W, Q, A, arg):
+    if W.shape[0] == 0:
+        return np.array([])
+    elif W.shape[1] == 1:
+        return np.array([1])
     k = W.shape[1]
-    A = np.identity(k)
+    k_old = A.shape[0]
+    if k == k_old:
+        return A
+    A_ = np.identity(k)
+    A_[0 : k - 1, 0 : k - 1] = A
+    for i in range(k - 1):
+        A_[i, k - 1] = W[:, -1].T.dot(Q[:, arg]) / W[:, -1].T.dot(W[:, -1])
+    return A_
+            
     
 
 

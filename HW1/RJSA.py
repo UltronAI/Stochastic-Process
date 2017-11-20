@@ -76,7 +76,7 @@ for order in [2]: # [1, 2]:
 
     print("[N_train, N_val, d, c] = [{0}, {1}, {2}, {3}]".format(N_train, N_val, d, c))
 
-    print(">> Starting iteration ...")
+    print(">> Starting iterations ...")
     t0 = time.time()
     for i in range(iter):
         k = Mu.shape[0]
@@ -89,6 +89,7 @@ for order in [2]: # [1, 2]:
         trainLoss = np.append(trainLoss, loss_train)
         if np.mod(i, 100) == 0: # save model per 50 iter
             if i != 0:
+                plt.close()
                 plt.figure()
                 plt.plot(np.arange(i + 1), valLoss, "r", label = "loss_val")
                 plt.plot(np.arange(i + 1), trainLoss, "b", label = "loss_train")
@@ -194,11 +195,14 @@ for order in [2]: # [1, 2]:
     np.save("model/RJSA/Mu{0}_{1}.npy".format(order, phi), Mu)
     np.save("model/RJSA/Alpha{0}_{1}.npy".format(order, phi), alpha)
     np.save("model/RJSA/Tao{0}_{1}.npy".format(order, phi), tao)
+    plt.close()    
     plt.figure()
     plt.plot(np.arange(iter), valLoss, "r", label = "loss_val")
     plt.plot(np.arange(iter), trainLoss, "b", label = "loss_train")
     plt.legend()
     plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, phi))
+    t1 = time.time()
+    t = t1 - t0
     print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, i, t, k, loss_val, loss_train))
 
     alpha = Alpha(x, Mu, y, phi)

@@ -46,7 +46,7 @@ for order in [1, 2]:
     Q = Phi(x_train, x_train, phi)
 
     M = Q.shape[1]
-    rho = 1e-4
+    rho = 1e-4 if order == 1 else 5e-5
     ERR = 0
     iter = 2000
     W = np.array([])
@@ -102,15 +102,21 @@ for order in [1, 2]:
 
         if k >= k_max or 1 - ERR < rho:
             print("ERR", ERR)
+            iter = it + 1
             break
+        
+        if k>= 10 and abs(valLoss[-1] - valLoss[-2]) < 1e-5 and abs(trainLoss[-1] - trainLoss[-2]) < 1e-5:
+            iter = it + 1
+            break
+
         if it == 0:
             W_ = Q
         else:
             W_ = GetW(W, W_, Q, Arg)
         arg, err = ArgErrMax(W_, y_train, Arg)
-        ERR += err
-        if arg in Arg:
+        if arg is None or arg in Arg:
             continue
+        ERR += err
         Arg = np.append(Arg, arg)
         if W.shape[0] == 0:
             W = np.append(W, W_[:, arg]).reshape(N_train, 1)
@@ -136,13 +142,13 @@ for order in [1, 2]:
     print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, it, t, k, loss_val, loss_train))
 
     Q_total = Phi(x, C, phi)
-    W_total = Q_val.dot(la.inv(A))
+    W_total = Q_total.dot(la.inv(A))
 
     alpha_total = Alpha(x, W_total, y, phi)
-    tao_total = Tao(x, W, y, phi)
-    loss_total = Loss(x, W, y, alpha_total, tao_total, phi)
+    tao_total = Tao(x, W_total, y, phi)
+    loss_total = Loss(x, W_total, y, alpha_total, tao_total, phi)
 
-    print("total loss = %.5f, k = %d" % (loss_, k))
+    print("total loss = %.5f, k = %d" % (loss_total, k))
 
     print("************ Do testing ************")
 

@@ -46,7 +46,7 @@ for order in [1, 2]:
     Q = Phi(x_train, x_train, phi)
 
     M = Q.shape[1]
-    rho = 1e-3
+    rho = 1e-4
     ERR = 0
     iter = 2000
     W = np.array([])
@@ -54,7 +54,7 @@ for order in [1, 2]:
     A = np.array([])
     C = np.array([])
 
-    k_max = 400
+    k_max = 300
     valLoss = np.array([])
     trainLoss = np.array([])
 
@@ -97,7 +97,7 @@ for order in [1, 2]:
             np.save("model/OLS/A{0}_{1}.npy".format(order, phi), A)
             t1 = time.time()
             t = t1 - t0
-            print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, it, t, k, loss_val, loss_train))
+            print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ ERR = %.5f ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, it, t, k, ERR, loss_val, loss_train))
             t0 = time.time()    
 
         if k >= k_max or 1 - ERR < rho:

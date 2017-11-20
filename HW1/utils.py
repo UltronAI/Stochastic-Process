@@ -344,3 +344,18 @@ def SA3(X, y, iter, Mu, Mu_old, phi = "Gauss"):
         return Mu
     else:
         return Mu_old
+
+def AIC(X, y, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi = "Gauss"):
+    c = y.shape[1]
+    d = Mu.shape[1]
+    N = X.shape[0]
+
+    k = Mu.shape[0]
+    k_old = Mu_old.shape[0]
+    loss = Loss(X, Mu, y, alpha, tao, phi)
+    loss_old = Loss(X, Mu_old, y, alpha_old, tao_old, phi)
+
+    if ((k * (c + 1) + c * (1 + d)) + 1) * loss ** 2 < ((k_old * (c + 1) + c * (1 + d)) + 1) * loss_old ** 2:
+        return Mu
+    else:
+        return Mu_old

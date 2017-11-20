@@ -142,13 +142,3 @@ def GetA(W, Q, A, arg):
     for i in range(k - 1):
         A_[i, k - 1] = W[:, -1].T.dot(Q[:, arg]) / W[:, -1].T.dot(W[:, -1])
     return A_
-            
-    
-
-
-
-
-
-
-
-

@@ -1,6 +1,6 @@
 import scipy.io as sio
 import numpy as np
-from utils_RJSA import *
+from utils import *
 import warnings, time, os, random
 import matplotlib as mpl
 mpl.use("Agg")
@@ -11,7 +11,10 @@ warnings.filterwarnings("ignore")
 # data1_path = "data/data1.mat" : x: 1000 x 2 | y: 1000 x 2 | xtest: 200 x 2
 # data2_path = "data/data2.mat" : x: 1000 x 3 | y: 1000 x 2 | xtets: 200 x 3
 
-for order in [2]: # [1, 2]:
+method = "MDL" # "RJSA" "AIC" "MDL"
+k_init = 300
+
+for order in [1, 2]:
 
     print("*** Loading data from {} ***".format("data/data{}.mat".format(order)))
     data = sio.loadmat("data/data{}.mat".format(order))
@@ -33,13 +36,13 @@ for order in [2]: # [1, 2]:
     print("xtest:", xtest.shape)
 
     print("******** Initializing parameters ********")
-    
+        
     if order == 1:
         k = 0
         iter = 1000
         Mu = np.array([])
     else:
-        k = 300
+        k = k_init
         iter = 2000
         # Mu = np.random.randn(k, x.shape[1])
         Mu = InitMu(k, x)
@@ -47,7 +50,7 @@ for order in [2]: # [1, 2]:
     k = 0
     Mu = np.array([])
     """
-    
+        
     s = 1
     k_max = 400
     valLoss = np.array([])
@@ -55,7 +58,7 @@ for order in [2]: # [1, 2]:
 
     [N, d] = x.shape
     c = y.shape[1]
-    
+        
     print("[k_max, s, iter, total_num] = [{0}, {1}, {2}, {3}]".format(k_max, s, iter, N))
 
     b_ = lambda k, k_max: 0 if k == k_max else 1 if k == 0 else 0.2
@@ -76,7 +79,8 @@ for order in [2]: # [1, 2]:
 
     print("[N_train, N_val, d, c] = [{0}, {1}, {2}, {3}]".format(N_train, N_val, d, c))
 
-    print(">> Starting iterations ...")
+    print(">> Starting iterations for [{}]".format(method))
+    t_init = time.time()
     t0 = time.time()
     for i in range(iter):
         k = Mu.shape[0]
@@ -87,23 +91,31 @@ for order in [2]: # [1, 2]:
         valLoss = np.append(valLoss, loss_val)
         loss_train = Loss(x_train, Mu, y_train, alpha, tao, phi)
         trainLoss = np.append(trainLoss, loss_train)
-        if np.mod(i, 100) == 0: # save model per 50 iter
+        if np.mod(i, 100) == 0: # save model per 100 iter
             if i != 0:
                 plt.close()
                 plt.figure()
                 plt.plot(np.arange(i + 1), valLoss, "r", label = "loss_val")
                 plt.plot(np.arange(i + 1), trainLoss, "b", label = "loss_train")
                 plt.legend()
-                plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, phi))
+                plt.savefig("model/{0}/loss{1}_{2}.png".format(method, order, phi))
             t1 = time.time()
             t = t1 - t0
-            np.save("model/RJSA/valLoss{0}_{1}.npy".format(order, phi), valLoss)
-            np.save("model/RJSA/trainLoss{0}_{1}.npy".format(order, phi), trainLoss)
-            np.save("model/RJSA/Mu{0}_{1}.npy".format(order, phi), Mu)
-            np.save("model/RJSA/Alpha{0}_{1}.npy".format(order, phi), alpha)
-            np.save("model/RJSA/Tao{0}_{1}.npy".format(order, phi), tao)
-            print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, i, t, k, loss_val, loss_train))
+            np.save("model/{0}/valLoss{1}_{2}.npy".format(method, order, phi), valLoss)
+            np.save("model/{0}/trainLoss{1}_{2}.npy".format(method, order, phi), trainLoss)
+            np.save("model/{0}/Mu{1}_{2}.npy".format(method, order, phi), Mu)
+            np.save("model/{0}/Alpha{1}_{2}.npy".format(method, order, phi), alpha)
+            np.save("model/{0}/Tao{1}_{2}.npy".format(method, order, phi), tao)
+            print("%s | %d | %s | Iteration %d | time = %.4f | k = %d | val_loss = %.5f | train_loss = %.5f" % (method, order, phi, i, t, k, loss_val, loss_train))
             t0 = time.time()
+
+        if k >= k_max:
+            iter = i + 1
+            break
+        if valLoss.shape[0] >= 100 and abs(valLoss[-1] - valLoss[-5]) < 1e-5 and abs(trainLoss[-1] - trainLoss[-5]) < 1e-5:
+            iter = i + 1
+            break
+
         [bi, di, si, mi] = [b_(k, k_max), d_(k), s_(k, k_max), m_(k)]
         u = np.random.rand()
         if u <= bi:
@@ -171,48 +183,65 @@ for order in [2]: # [1, 2]:
             else:
                 Mu = Update(x_train, Mu, y_train, phi)
 
-        # perform a MH step with the annealed acceptance ratio
-        # SA method 1
-        """
-        alpha = Alpha(x, Mu, y, phi)
-        tao = Tao(x, Mu, y, phi)
-        Mu = SA1(x, Mu, y, alpha, tao, i, phi)
-        """
-        # SA method 2
-        """
-        alpha = Alpha(x_train, Mu, y_train, phi)
-        tao = Tao(x_train, Mu, y_train, phi)
-        alpha_old = Alpha(x_train, Mu_old, y_train, phi)
-        tao_old = Tao(x_train, Mu_old, y_train, phi)
-        Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
-        """
-        # SA method 3
-        Mu = SA3(x_train, y_train, i, Mu, Mu_old, phi) 
+        if method == "RJSA":
+            # perform a MH step with the annealed acceptance ratio
+            # SA method 1
+            """
+            alpha = Alpha(x, Mu, y, phi)
+            tao = Tao(x, Mu, y, phi)
+            Mu = SA1(x, Mu, y, alpha, tao, i, phi)
+            """
+            # SA method 2
+            """
+            alpha = Alpha(x_train, Mu, y_train, phi)
+            tao = Tao(x_train, Mu, y_train, phi)
+            alpha_old = Alpha(x_train, Mu_old, y_train, phi)
+            tao_old = Tao(x_train, Mu_old, y_train, phi)
+            Mu = SA2(x_val, y_val, i + val * iter, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
+            """
+            # SA method 3
+            Mu = SA3(x_train, y_train, i, Mu, Mu_old, phi) 
+        elif method == "AIC":
+            alpha = Alpha(x_train, Mu, y_train, phi)
+            tao = Tao(x_train, Mu, y_train, phi)
+            alpha_old = Alpha(x_train, Mu_old, y_train, phi)
+            tao_old = Tao(x_train, Mu_old, y_train, phi)
+            Mu = AIC(x_train, y_train, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
+        elif method == "BIC":
+            alpha = Alpha(x_train, Mu, y_train, phi)
+            tao = Tao(x_train, Mu, y_train, phi)
+            alpha_old = Alpha(x_train, Mu_old, y_train, phi)
+            tao_old = Tao(x_train, Mu_old, y_train, phi)
+            Mu = BIC(x_train, y_train, Mu, Mu_old, alpha, alpha_old, tao, tao_old, phi)
 
     # save model
-    np.save("model/RJSA/valLoss{0}_{1}.npy".format(order, phi), valLoss)
-    np.save("model/RJSA/trainLoss{0}_{1}.npy".format(order, phi), trainLoss)
-    np.save("model/RJSA/Mu{0}_{1}.npy".format(order, phi), Mu)
-    np.save("model/RJSA/Alpha{0}_{1}.npy".format(order, phi), alpha)
-    np.save("model/RJSA/Tao{0}_{1}.npy".format(order, phi), tao)
-    plt.close()    
-    plt.figure()
-    plt.plot(np.arange(iter), valLoss, "r", label = "loss_val")
-    plt.plot(np.arange(iter), trainLoss, "b", label = "loss_train")
-    plt.legend()
-    plt.savefig("model/RJSA/loss{0}_{1}.png".format(order, phi))
+    np.save("model/{0}/valLoss{1}_{2}.npy".format(method, order, phi), valLoss)
+    np.save("model/{0}/trainLoss{1}_{2}.npy".format(method, order, phi), trainLoss)
+    np.save("model/{0}/Mu{1}_{2}.npy".format(method, order, phi), Mu)
+    np.save("model/{0}/Alpha{1}_{2}.npy".format(method, order, phi), alpha)
+    np.save("model/{0}/Tao{1}_{2}.npy".format(method, order, phi), tao)
     t1 = time.time()
     t = t1 - t0
-    print("[ %d ] [ %s ] [ Iteration %d ] [ time = %.4f ] [ k = %d ] [ val_loss = %.5f ] [ train_loss = %.5f ]" % (order, phi, i, t, k, loss_val, loss_train))
+    print("%s | %d | %s | Iteration %d | time = %.4f | k = %d | val_loss = %.5f | train_loss = %.5f" % (method, order, phi, i, t, k, loss_val, loss_train))
 
     alpha = Alpha(x, Mu, y, phi)
     tao = Tao(x, Mu, y, phi)
     loss_ = Loss(x, Mu, y, alpha, tao, phi)
-    print("total loss = %.5f, k = %d" % (loss_, k))
+    t_end = time.time()
+    t_total = t_end - t_init
+    np.save("model/{0}/Time{1}_{2}.npy".format(method, order, phi), np.array([t_total]))
+    print("total loss = %.5f, total time = %.4f, k = %d" % (loss_, t_total, k))
+
+    plt.close()
+    plt.figure()
+    plt.plot(np.arange(iter), valLoss, "r", label = "loss_val")
+    plt.plot(np.arange(iter), trainLoss, "b", label = "loss_train")
+    plt.legend()
+    plt.savefig("model/{0}/loss{1}_{2}.png".format(method, order, phi))
 
     print("************ Do testing ************")
 
     # test
     ytest = Predict(xtest, Mu, alpha, tao, c, phi)
-    np.save("model/RJSA/v{0}_{1}.npy".format(order, phi), ytest)
-    print("******** model-RJSA-v{} is saved ********".format(order))
+    np.save("model/{0}/v{1}_{2}.npy".format(method, order, phi), ytest)
+    print("******** model-{0}-v{1} is saved ********".format(method, order))

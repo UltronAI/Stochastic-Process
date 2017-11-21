@@ -1,0 +1,20 @@
+随机过程第一次大作业
+
+高枫 2015011208
+
+本目录下的文件说明如下：
+
+- report.pdf：作业最终报告
+- MH.py：Metropolis-Hastings实验的代码文件
+- NN.py：使用神经网络进行测试的代码文件
+- RJRBF.py：RJMCMC+SA/AIC进行实验的主代码文件
+- utils.py：RJMCMC+SA/AIC实验中用到的函数文件
+- RJMCMC.py：RJMCMC实验的主代码文件
+- utils_RJMCMC：RJMCMC实验中用到的函数文件
+- OLS.py：使用OLS方法进行测试的主代码文件
+- utils_OLS.py：OLS实验中用到的函数文件
+- ./data/: 存放data1和data2数据
+- ./ref/：存放着本次作业的参考文献的pdf版本
+- ./model/：存放着训练后的模型，以npy格式保存
+- ./report_src/：存放着本次作业报告的LaTeX源码及相关文件和图片
+- ./output/：存放着输出的mat文件

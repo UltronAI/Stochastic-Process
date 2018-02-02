@@ -55,12 +55,13 @@ for year in [2010, 2011, 2012, 2013, 2014]:
         train_loss = mse(x_train.dot(w), y_train)
         val_loss = mse(x_val.dot(w), y_val)
         
-        if min_loss > (train_loss+val_loss)/2:
-#            print("^^^^")
+        mean_loss = train_loss*0.25+val_loss*0.75
+        
+        if min_loss > mean_loss:
             min_id = i+1
             min_w = w
             min_loss = (train_loss+val_loss)/2
-        print("#%d\tval_loss=%.3f\ttrain_loss=%.3f" % (i+1, val_loss, train_loss))
+        print("#%d \t valLoss=%.3f \t trainLoss=%.3f \t meanLoss=%.3f" % (i+1, val_loss, train_loss, mean_loss))
         
     loss = mse(x.dot(min_w), y)
     y_pred = x_test.dot(min_w)

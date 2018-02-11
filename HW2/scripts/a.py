@@ -3,6 +3,7 @@
 import scipy.io as sio
 import numpy.linalg as LA
 from utils import mse
+import numpy as np
 
 result = np.array([]).reshape(0,1)
 
@@ -66,6 +67,8 @@ for year in [2010, 2011, 2012, 2013, 2014]:
     loss = mse(x.dot(min_w), y)
     y_pred = x_test.dot(min_w)
     print("[use #{}] total loss={}".format(min_id, loss))
+            
+    sio.savemat("../results/a_{}_{}.mat".format(year, loss), {'Ypred': y_pred})
     
     if result.shape[0] > 0:
         result = np.concatenate((result, y_pred), axis=0)

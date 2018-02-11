@@ -99,6 +99,8 @@ for year in [2010, 2011, 2012, 2013, 2014]:
         f_ = np.random.normal(x_.dot(min_wmean), x_.dot(min_wcov).dot(x_.T))
         n_ = np.random.normal(0, Sn)
         y_pred[j] = f_+n_
+        
+    sio.savemat("../results/b_{}_{}.mat".format(year, loss), {'Ypred': y_pred})
     
     if result.shape[0] > 0:
         result = np.concatenate((result, y_pred), axis=0)

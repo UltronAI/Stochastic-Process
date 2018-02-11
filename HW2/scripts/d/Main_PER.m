@@ -127,6 +127,18 @@ for order = 1:5
     Ytrain = [Y(1:start-1, :); Y(start+Nval:end, :)];
 
     K_inv = K_inv_best;
+    
+    Ypred = zeros(N, 1);
+    for i = 1:N
+        K_star = zeros(1, Ntrain);
+        for j = 1:Ntrain
+            K_star(1, j) = sigma^2*exp(-2*(sin(pi*sqrt(sum((X(i,:)-Xtrain(j,:)).^2))/p))^2/l^2);
+        end
+        Ypred(i) = normrnd(K_star*K_inv*Ytrain, sigma^2+sigma_n^2-K_star*K_inv*K_star');
+    end
+    
+    total_loss = sum((Ypred-Y).^2)/N;
+    
     Ypred = zeros(Ntest, 1);
     for i = 1:Ntest
         K_star = zeros(1, Ntrain);
@@ -136,6 +148,8 @@ for order = 1:5
         Ypred(i) = normrnd(K_star*K_inv*Ytrain, sigma^2+sigma_n^2-K_star*K_inv*K_star');
     end
     result = [result; Ypred];
+    save_name = sprintf('../../results/d_PER_%d_val%.3f_%.3f.mat', year_cur, loss_min, total_loss);
+    save(save_name, 'result');
 end
 
 for i = 1:5

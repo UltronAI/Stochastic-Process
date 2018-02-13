@@ -142,7 +142,7 @@ for order = 1:5
         Ypred(i) = normrnd(K_star*K_inv*Ytrain, sigma^2+sigma_n^2-K_star*K_inv*K_star');
     end
     result = [result; Ypred];
-    save_name = sprintf('../../results/d_SE_%d_%.3f.mat', year_cur, total_loss);
+    save_name = sprintf('../../results/d_SE_%d_val%.3f_%.3f.mat', year_cur, loss_min, total_loss);
     save(save_name, 'result');
 end
 

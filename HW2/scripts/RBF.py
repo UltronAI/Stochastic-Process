@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore")
 result = np.array([]).reshape(0,1)
 
 phi = "Gauss"
-method = "MDL"
+method = "RJSA"
 
 for year in [2010, 2011, 2012, 2013, 2014]:
     print(">>>>>")
